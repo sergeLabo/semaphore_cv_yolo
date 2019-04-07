@@ -1,6 +1,6 @@
 # mon semaphore
 
-Création d'image pour créer un Intelligence Artificielle en particulier avec YOLO
+Création d'image pour créer un Intelligence Artificielle avec YOLO
 
 ### Contexte
 

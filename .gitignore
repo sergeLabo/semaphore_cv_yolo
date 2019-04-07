@@ -19,6 +19,13 @@ failed/
 *.npz
 training_shot.zip
 weights/
+lettre/
+lettre_epaisse_alpha/
+lettre_shot/
+*.tar.gz
+shot_test/
+train.txt
+test.txt
 
 # Python test
 *_old.py
