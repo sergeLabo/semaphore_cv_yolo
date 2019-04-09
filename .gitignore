@@ -4,7 +4,7 @@
 *.geanywb
 
 # divers
-video/
+
 old/
 alphabet_old/
 shot/
@@ -20,8 +20,8 @@ failed/
 training_shot.zip
 weights/
 lettre/
-lettre_epaisse_alpha/
 lettre_shot/
+lettre_raw/
 *.tar.gz
 shot_test/
 train.txt
