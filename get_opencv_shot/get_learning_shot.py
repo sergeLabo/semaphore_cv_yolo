@@ -18,10 +18,8 @@
 
 """
 Création d'images toujours carrées avec un semaphore collé
-
 fond = video = /video/Astrophotography-Stars-Sunsets-Sunrises-Storms.ogg
 27 lettres
-image de 1024x1024
 <object-class> <x> <y> <width> <height>
 """
 
@@ -30,7 +28,6 @@ import math
 import random
 import numpy as np
 import cv2
-from PIL import Image
 
 from pymultilame import MyTools
 
@@ -63,7 +60,13 @@ class CreateShot:
         self.get_shots()
 
     def create_directories(self):
-        self.tools.create_directory('./shot_test')
+        """Un dossier root=shot, un sous dossier par lettre"""
+        
+        self.tools.create_directory('./shot')
+        for l in LETTRES:
+            if l == " ":
+                l = "space"
+            self.tools.create_directory('./shot/shot_' + l)
 
     def get_letters_files(self):
         letters_files = self.tools.get_all_files_list("lettre_epaisse_alpha", ".png")
@@ -170,16 +173,13 @@ class CreateShot:
         lettre, x_size, y_size, x, y = self.lettre_image_change(lettre)
         
         # Overlay
-        #img = over_transparent(frame, lettre, x, y)
-        img = pil_overlay(frame, lettre)
+        img = over_transparent(frame, lettre, x, y)
         
         return img, l, x_size, y_size, x, y
 
     def save(self, img, lettre, x_size, y_size, x, y, n):
-        """Enregistrement dans le dossier ./shot/lettre/ de
-        toto.png
-        et
-        toto.txt
+        """Enregistrement dans le dossier ./shot/shot_a/ de
+        shot_0_a.jpg et shot_0_a.txt
         class position(x y) taille(x y)
         x, y position du coin haut gauche
         s = taille de la lettre
@@ -192,8 +192,8 @@ class CreateShot:
         if lettre == ' ':
             lettre = 'space'
 
-        # Sans sous dossiers
-        fichier = './shot_test/shot_' + str(n) + '_' + lettre
+        # Avec sous dossiers
+        fichier = './shot/shot_' + lettre + '/shot_' + str(n) + '_' + lettre
         
         # Enregistrement de l'image
         cv2.imwrite(fichier + '.jpg', img)
@@ -220,11 +220,6 @@ class CreateShot:
         self.loop = 1
         while self.loop:
             ret, frame = self.capture.read()
-            # #b_channel, g_channel, r_channel = cv2.split(frame)
-            # ## Creating a dummy alpha channel image
-            # #alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 50 
-            # #frame = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
-            
             if ret:
                 # pour enregistrer 1 frame sur 10 et varier les fonds
                 if n % 10 == 0:
@@ -257,9 +252,6 @@ class CreateShot:
         print("Nombre d'images crées:", m)
         cv2.destroyAllWindows()
 
-def pil_overlay(im1, im2):
-
-    return Image.alpha_composite(im1, im2)
 
 def delete_gray(lettre):
     """Supprime le gris alpha autour des lettres
@@ -273,120 +265,12 @@ def delete_gray(lettre):
         
     return lettre
     
-def rotate_image(image, angle):
-    '''Rotate image "angle" degrees.
-
-    How it works:
-    - Creates a blank image that fits any rotation of the image. To achieve
-      this, set the height and width to be the image's diagonal.
-    - Copy the original image to the center of this blank image
-    - Rotate using warpAffine, using the newly created image's center
-      (the enlarged blank image center)
-    - Translate the four corners of the source image in the enlarged image
-      using homogenous multiplication of the rotation matrix.
-    - Crop the image according to these transformed corners
-    '''
-
-    diagonal = int(math.ceil(math.sqrt(pow(image.shape[0], 2) + pow(image.shape[1], 2))))
-    offset_x = (diagonal - image.shape[0])/2
-    offset_y = (diagonal - image.shape[1])/2
-    dst_image = np.zeros((diagonal, diagonal, 3), dtype='uint8')
-    image_center = (float(diagonal-1)/2, float(diagonal-1)/2)
-
-    R = cv2.getRotationMatrix2D(image_center, -angle, 1.0)
-    dst_image[offset_x:(offset_x + image.shape[0]), offset_y:(offset_y + image.shape[1]), :] = image
-    dst_image = cv2.warpAffine(dst_image, R, (diagonal, diagonal), flags=cv2.INTER_LINEAR)
-
-    # Calculate the rotated bounding rect
-    x0 = offset_x
-    x1 = offset_x + image.shape[0]
-    x2 = offset_x + image.shape[0]
-    x3 = offset_x
-
-    y0 = offset_y
-    y1 = offset_y
-    y2 = offset_y + image.shape[1]
-    y3 = offset_y + image.shape[1]
-
-    corners = np.zeros((3,4))
-    corners[0,0] = x0
-    corners[0,1] = x1
-    corners[0,2] = x2
-    corners[0,3] = x3
-    corners[1,0] = y0
-    corners[1,1] = y1
-    corners[1,2] = y2
-    corners[1,3] = y3
-    corners[2:] = 1
-
-    c = np.dot(R, corners)
-
-    x = int(round(c[0,0]))
-    y = int(round(c[1,0]))
-    left = x
-    right = x
-    up = y
-    down = y
-
-    for i in range(4):
-        x = c[0,i]
-        y = c[1,i]
-        if (x < left): left = x
-        if (x > right): right = x
-        if (y < up): up = y
-        if (y > down): down = y
-    h = int(round(down - up))
-    w = int(round(right - left))
-    left = int(round(left))
-    up = int(round(up))
-
-    cropped = np.zeros((w, h, 3), dtype='uint8')
-    cropped[:, :, :] = dst_image[left:(left+w), up:(up+h), :]
-    return cropped
-
 def rotateImage(image, angle):
     image_center = tuple(np.array(image.shape[1::-1]) / 2)
     rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
     result = cv2.warpAffine(image, rot_mat, image.shape[1::-1],
                             flags=cv2.INTER_LINEAR)
     return result
-
-def deform_rotation(lettre, angle):
-    # Rotation qui déforme l'image
-    rows, cols, a = lettre.shape
-    M = cv2.getRotationMatrix2D((cols/2,rows/2), angle, 1)
-    lettre = cv2.warpAffine(lettre, M, (cols, rows))
-    return lettre
-
-def transparent_overlay(src , overlay , pos=(0,0), scale = 1):
-    """Overlay a transparent image on backround.
-    :param src: Input Color Background Image
-    :param overlay: transparent Image (BGRA)
-    :param pos:  position where the image to be blit.
-    :param scale : scale factor of transparent image.
-    :return: Resultant Image
-    """
-
-    overlay = cv2.resize(overlay, (0, 0), fx=scale, fy=scale)
-    
-    # Size of pngImg
-    h,w,_ = overlay.shape
-      
-    # Size of background Image
-    rows,cols,_ = src.shape
-    
-    # Position of PngImage 
-    y, x = pos[0],pos[1]    
-    
-    # Loop over all pixels and apply the blending equation
-    for i in range(h):
-        for j in range(w):
-            if x+i >= rows or y+j >= cols:
-                continue
-            alpha = float(overlay[i][j][3]/255.0) # read the alpha channel 
-            src[x+i][y+j] = alpha*overlay[i][j][:3]+(1-alpha)*src[x+i][y+j]
-    return src
-
 
 def over_transparent(bg, over, x, y):
     """Overlay over sur bg, à la position x, y
@@ -428,18 +312,4 @@ if __name__ == "__main__":
     video = 'video/Astrophotography-Stars-Sunsets-Sunrises-Storms.ogg'
     # Taille des images multiple de 32, 32*20=640
     # 2000 images par classe 2000x27=54000 + 6000 de test
-    cs = CreateShot(640, video, 5)
-
-"""
-    x_offset = y_offset = 50
-    y1, y2 = y_offset, y_offset + over.shape[0]
-    x1, x2 = x_offset, x_offset + over.shape[1]
-
-    alpha_s = over[:, :, 3] / 255.0
-    alpha_l = 1.0 - alpha_s
-
-    for c in range(0, 3):
-        bg[y1:y2, x1:x2, c] = (alpha_s * over[:, :, c] +
-                                  alpha_l * bg[y1:y2, x1:x2, c])
-    return bg
-"""
+    cs = CreateShot(640, video, number=60000)

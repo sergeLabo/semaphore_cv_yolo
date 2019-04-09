@@ -12,8 +12,16 @@ Réalisé avec:
 
 ### La documentation sur ressources.labomedia.org
 
-* [Sémaphore](https://ressources.labomedia.org/tag/semaphore?do=showtag&tag=semaphore)
-* [pymultilame](https://ressources.labomedia.org/pymultilame)
+* [Toutes les pages sur Sémaphore](https://ressources.labomedia.org/tag/semaphore?do=showtag&tag=semaphore)
+* [Mon module python perso pymultilame](https://ressources.labomedia.org/pymultilame)
+
+Les pages sur Yolo Darknet
+
+
+
+### Remarques
+
+La video n'est pas sur ce dépôt
 
 ### Merci à:
 
