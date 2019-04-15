@@ -2,7 +2,7 @@
 
 Création d'image pour tester une Intelligence Artificielle avec Yolo Darknet
 
-<img src="/axe/image_axe_test/shot_53_z.jpg" width="300" height="300"><img src="/axe/image_axe_test/shot_455_w.jpg" width="300" height="300"><img src="/axe/image_axe_test/shot_894_c.jpg" width="300" height="300">
+<img src="/axe/image_axe_test/shot_53_z.jpg" width="250" height="250"><img src="/axe/image_axe_test/shot_455_w.jpg" width="250" height="250"><img src="/axe/image_axe_test/shot_894_c.jpg" width="250" height="250">
 
 ### Contexte
 
@@ -34,6 +34,7 @@ blenderplayer get_lettre_epaisse.blend
 Retravailler les images dans Gimp
 * transparence
 * resize
+* ajout d'un axe blanc
 
 ##### Création des images avec opencv
 
