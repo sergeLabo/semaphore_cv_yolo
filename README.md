@@ -14,6 +14,7 @@ Réalisé avec:
 
 ### La documentation sur ressources.labomedia.org
 
+* [Yolo v3 Darknet avec un GPU](https://ressources.labomedia.org/yolo_darknet_sur_un_portable_optimus)
 * [Toutes les pages sur Sémaphore](https://ressources.labomedia.org/tag/semaphore?do=showtag&tag=semaphore)
 * [Les pages sur Yolo Darknet](https://ressources.labomedia.org/tag/yolo_darknet?do=showtag&tag=yolo_darknet)
 
