@@ -2,6 +2,8 @@
 
 Création d'image pour tester une Intelligence Artificielle avec Yolo Darknet
 
+<img src="/axe/image_axe_test/shot_53_z.jpg" width="300" height="300"><img src="/axe/image_axe_test/shot_455_w.jpg" width="300" height="300"><img src="/axe/image_axe_test/shot_894_c.jpg" width="300" height="300">
+
 ### Contexte
 
 Réalisé avec:
