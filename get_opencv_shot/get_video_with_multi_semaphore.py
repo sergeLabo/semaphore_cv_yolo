@@ -5,7 +5,6 @@
 import random
 import numpy as np
 import cv2
-from cv2 import VideoWriter, VideoWriter_fourcc
 from pymultilame import MyTools
 
 
@@ -41,7 +40,7 @@ class GetVideoWithSemaphore:
         self.get_semaphore_video()
 
     def get_letters_files(self):
-        letters_files = self.tools.get_all_files_list("lettre", ".png")
+        letters_files = self.tools.get_all_files_list("lettre_epaisse_alpha", ".png")
         print("Nombre de letters =", len(letters_files))
         return letters_files
 
@@ -59,14 +58,15 @@ class GetVideoWithSemaphore:
         """ Conservation dans self.size_pos_list = [[y_size, x_pos, y_pos]]
         lettre_img_list: liste des images des lettres [image_de_a, image_de_f, ...]
         lettre_list: liste des lettres ['a', 'f', ...]
+        change = changement de lettre, soit affichage des lettres en cours
         """
 
         for i in range(len(lettre_list)):
             # changement seulement à every
             if change == 1:
                 # Plage de taille possible
-                h_mini_semaphore = int(self.height/20)
-                h_maxi_semaphore = int(self.height/4)
+                h_mini_semaphore = int(self.height/10)
+                h_maxi_semaphore = int(self.height/1.2)
                 # Choix
                 y_size = random.randint(h_mini_semaphore, h_maxi_semaphore)
                 # x découle de y
@@ -76,7 +76,7 @@ class GetVideoWithSemaphore:
                 img = cv2.resize(lettre_img_list[i], (x_size, y_size),
                                  interpolation=cv2.INTER_CUBIC)
                 # Position
-                x_pos = random.randint(100, self.width - x_size - 100)
+                x_pos = random.randint(50, self.width - x_size - 50)
                 y_pos = random.randint(0, self.height - y_size)           
 
                 # Storage
@@ -91,6 +91,8 @@ class GetVideoWithSemaphore:
                 img = cv2.resize(lettre_img_list[i], (x_size, y_size),
                                  interpolation=cv2.INTER_CUBIC)
 
+            # Modification de l'aspect de la lettre
+            img = aspect_change(img)
             # Overlay de lettre_img déjà retaillée à position x, y
             frame = over_transparent(frame, img, x_pos, y_pos)
             
@@ -99,6 +101,8 @@ class GetVideoWithSemaphore:
     def add_lettre(self, frame, lettre_list):
         k = 0
         for l in lettre_list:
+            if l == " ":
+                l = "space"
             # Overlay du caractère l
             font = cv2.FONT_HERSHEY_SIMPLEX
             frame = cv2.putText(frame, l, (10, int(self.height*(0.95-k))),
@@ -115,7 +119,7 @@ class GetVideoWithSemaphore:
         lettre_img_list = []
         
         # Get n lettres
-        n = random.randint(0, 10)
+        n = random.randint(1, 3)
         for i in range(n):
             k = random.randint(0, 26)
             lettre_list.append(list(self.letters.keys())[k])
@@ -176,9 +180,52 @@ class GetVideoWithSemaphore:
         cv2.destroyAllWindows()
 
 
+def aspect_change(lettre):
+    """Couleur, flou, rotation
+    lettre est l'image de la lettre
+    """
+
+    bg_color = lettre[0][0]
+    R = random.randint(0, 100)
+    G = random.randint(0, 50)
+    B = random.randint(100, 255)
+    lettre[np.all(lettre == [0, 0, 0, 255], axis=2)] = [R, G, B, 255]
+    mask = np.all(lettre == bg_color, axis=2)
+    lettre[mask] = [0, 0, 0, 0]
+
+    # Rotation
+    some = random.randint(-3, 3)
+    lettre = rotateImage(lettre, some)
+
+    # Flou de 0 à 4
+    flou = random.randint(0, 4)
+    if flou != 0:
+        lettre = cv2.blur(lettre, (flou, flou))
+        
+    return lettre
+        
+def delete_gray(lettre):
+    """Supprime le gris alpha autour des lettres
+    Méthode bourrin
+    """
+    transp = [255, 255, 255, 0]
+    for x in range(lettre.shape[1]):
+        for y in range(lettre.shape[0]):
+            if lettre[y, x][3] < 255:    
+                lettre[y, x] = transp
+        
+    return lettre
+    
+def rotateImage(image, angle):
+    image_center = tuple(np.array(image.shape[1::-1]) / 2)
+    rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+    result = cv2.warpAffine(image, rot_mat, image.shape[1::-1],
+                            flags=cv2.INTER_LINEAR)
+    return result
+
 def over_transparent(bg, over, x, y):
     """Overlay over sur bg, à la position x, y
-    x, y = coin supérieur gauche de overlay
+    x, y = coin supérieur gauche de over
     """
     
     bg_width = bg.shape[1]
@@ -211,10 +258,10 @@ def over_transparent(bg, over, x, y):
 
     return bg
 
-    
+
 if __name__ == "__main__":
     video_in = 'video/Astrophotography-Stars-Sunsets-Sunrises-Storms.ogg'
-    video_out = 'video/multi_semaphore.avi'
+    video_out = 'video/cv_axe.avi'
     lenght = 180  # secondes
-    every = 2  # une lettre changée toutes les 1 secondes
+    every = 2  # une lettre changée toutes les 1 seconde
     gvws = GetVideoWithSemaphore(video_in, video_out, lenght, every)

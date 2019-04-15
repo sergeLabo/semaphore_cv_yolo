@@ -1,4 +1,4 @@
-# mon semaphore
+# semaphore_cv_yolo
 
 Création d'image pour tester une Intelligence Artificielle avec Yolo Darknet
 
@@ -23,14 +23,14 @@ Réalisé avec:
 
 #### Utilisation
 
-#####Création des images du sémaphore seul. Dans le dossier get_lettre
+##### Création des images du sémaphore seul. Dans le dossier get_lettre
 
 ~~~text
 blenderplayer get_lettre_epaisse.blend
 ~~~
 
 Retravailler les images dans Gimp
-* tranparence
+* transparence
 * resize
 
 ##### Création des images avec opencv

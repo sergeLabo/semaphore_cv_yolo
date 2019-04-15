@@ -4,13 +4,11 @@
 *.geanywb
 
 # divers
-
 old/
 alphabet_old/
 shot/
 shot_1000_416_416/
 training_shot/
-video/
 langage_semaphore/
 training_shot_resized/
 shots/
