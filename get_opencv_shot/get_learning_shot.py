@@ -38,7 +38,6 @@ LETTRES = list(L)
 
 
 class CreateShot:
-
     def __init__(self, size, video, number=1000):
         """
         letters = {'a': image de a,
@@ -47,12 +46,12 @@ class CreateShot:
         """
         self.size = size
         self.number = number
-        
+
         self.tools = MyTools()
         self.create_directories()
         self.letters = self.get_letters_images()
         self.numero_lettre = 0
-        
+
         self.capture = cv2.VideoCapture(video)
         self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -62,15 +61,17 @@ class CreateShot:
 
     def create_directories(self):
         """Un dossier root=shot, un sous dossier par lettre"""
-        
-        self.tools.create_directory('./shot')
+
+        self.tools.create_directory("./shot")
         for l in LETTRES:
             if l == " ":
                 l = "space"
-            self.tools.create_directory('./shot/shot_' + l)
+            self.tools.create_directory("./shot/shot_" + l)
 
     def get_letters_files(self):
-        letters_files = self.tools.get_all_files_list("lettre_epaisse_alpha", ".png")
+        letters_files = self.tools.get_all_files_list(
+            "lettre_epaisse_alpha", ".png"
+        )
         print("Nombre de letters =", len(letters_files))
         return letters_files
 
@@ -92,17 +93,17 @@ class CreateShot:
         """
 
         # Largeur
-        a = int(self.width*self.size/self.height)
+        a = int(self.width * self.size / self.height)
         # Hauteur
         b = self.size
         # Resize
         frame = cv2.resize(frame, (a, b), interpolation=cv2.INTER_AREA)
 
         # Coupe
-        x = int((a - b)/2)
+        x = int((a - b) / 2)
         y = 0
         w, h = self.size, self.size
-        frame = frame[y:y+h, x:x+w]
+        frame = frame[y : y + h, x : x + w]
 
         return frame
 
@@ -127,9 +128,9 @@ class CreateShot:
         flou = random.randint(0, 4)
         if flou != 0:
             lettre = cv2.blur(lettre, (flou, flou))
-            
+
         return lettre
-        
+
     def lettre_image_change(self, lettre):
         """Adapte une lettre, calcule taille, position, flou, couleur
         lettre est l'image de la lettre
@@ -137,29 +138,29 @@ class CreateShot:
 
         # Modification de l'aspect
         lettre = self.aspect_change(lettre)
-        
+
         # Variation sur la taille du sémaphore
-        semaphore_mini = int(self.size/7)
+        semaphore_mini = int(self.size / 7)
 
         w, h = lettre.shape[1], lettre.shape[0]
         # Set de la hauteur, puis largeur
-        y_size = random.randint(semaphore_mini, int(self.size*0.8))
+        y_size = random.randint(semaphore_mini, int(self.size * 0.8))
         x_size = int(w * y_size / h)
 
         # Maxi de taille de lettre < self.size
         y_size = min(y_size, self.size)
         x_size = min(x_size, self.size)
-        
-        lettre = cv2.resize(lettre,
-                            (x_size, y_size),
-                            interpolation=cv2.INTER_CUBIC)
-        
+
+        lettre = cv2.resize(
+            lettre, (x_size, y_size), interpolation=cv2.INTER_CUBIC
+        )
+
         # Position posible
         x = random.randint(0, self.size - x_size)
         y = random.randint(0, self.size - y_size)
-        
+
         return lettre, x_size, y_size, x, y
-        
+
     def overlay(self, frame):
         """Trouve une lettre, supperpose à la frame"""
 
@@ -168,16 +169,16 @@ class CreateShot:
         self.numero_lettre += 1
         if self.numero_lettre == 27:
             self.numero_lettre = 0
-            
+
         # lettre est l'image de lettre
         lettre = self.letters[l]
 
         # Adaptation
         lettre, x_size, y_size, x, y = self.lettre_image_change(lettre)
-        
+
         # Overlay
         img = over_transparent(frame, lettre, x, y)
-        
+
         return img, l, x_size, y_size, x, y
 
     def save(self, img, lettre, x_size, y_size, x, y, n):
@@ -192,32 +193,38 @@ class CreateShot:
         indice = LETTRES.index(lettre)
 
         # pour avoir dossier clair
-        if lettre == ' ':
-            lettre = 'space'
+        if lettre == " ":
+            lettre = "space"
 
         # Avec sous dossiers
-        fichier = './shot/shot_' + lettre + '/shot_' + str(n) + '_' + lettre
-        
+        fichier = "./shot/shot_" + lettre + "/shot_" + str(n) + "_" + lettre
+
         # Enregistrement de l'image
-        cv2.imwrite(fichier + '.jpg', img)
+        cv2.imwrite(fichier + ".jpg", img)
 
         # Enregistrement des datas
         # Taille relative de l'image lettre
-        tx = x_size/self.size
-        ty = y_size/self.size
-        
+        tx = x_size / self.size
+        ty = y_size / self.size
+
         # Origine = top left
-        xc = (x + (x_size/2))/self.size
-        yc = (y + (y_size/2))/self.size
+        xc = (x + (x_size / 2)) / self.size
+        yc = (y + (y_size / 2)) / self.size
         # class-position du centre-taille
-        data =  str(indice) + ' '\
-                + str(xc) + ' '\
-                + str(yc) + ' '\
-                + str(tx) + ' '\
-                + str(ty)
-                
-        self.tools.write_data_in_file(data, fichier + '.txt', 'w')
-        
+        data = (
+            str(indice)
+            + " "
+            + str(xc)
+            + " "
+            + str(yc)
+            + " "
+            + str(tx)
+            + " "
+            + str(ty)
+        )
+
+        self.tools.write_data_in_file(data, fichier + ".txt", "w")
+
     def get_shots(self):
         n, m = 0, 0
         self.loop = 1
@@ -227,23 +234,23 @@ class CreateShot:
                 # pour enregistrer 1 frame sur 10 et varier les fonds
                 if n % 10 == 0:
                     frame = self.frame_resize(frame)
-                    
+
                     # Overlay d'une lettre
                     img, l, x_size, y_size, x, y = self.overlay(frame)
 
                     print("Shot numéro", m, "Lettre", l)
-                            
+
                     # Enregistrement de l'image et du fichier txt
                     self.save(img, l, x_size, y_size, x, y, m)
                     m += 1
-                    
-                cv2.imshow('image', img)
+
+                cv2.imshow("image", img)
 
                 # Jusqu'à number
                 n += 1
                 if m == self.number:
                     self.loop = 0
-                
+
                 # Echap et attente
                 k = cv2.waitKey(10)
                 if k == 27:
@@ -251,7 +258,7 @@ class CreateShot:
             else:
                 # Reset si la video est terminée
                 self.capture = cv2.VideoCapture(video)
-                
+
         print("Nombre d'images crées:", m)
         cv2.destroyAllWindows()
 
@@ -263,23 +270,26 @@ def delete_gray(lettre):
     transp = [255, 255, 255, 0]
     for x in range(lettre.shape[1]):
         for y in range(lettre.shape[0]):
-            if lettre[y, x][3] < 255:    
+            if lettre[y, x][3] < 255:
                 lettre[y, x] = transp
-        
+
     return lettre
-    
+
+
 def rotateImage(image, angle):
     image_center = tuple(np.array(image.shape[1::-1]) / 2)
     rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
-    result = cv2.warpAffine(image, rot_mat, image.shape[1::-1],
-                            flags=cv2.INTER_LINEAR)
+    result = cv2.warpAffine(
+        image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR
+    )
     return result
+
 
 def over_transparent(bg, over, x, y):
     """Overlay over sur bg, à la position x, y
     x, y = coin supérieur gauche de over
     """
-    
+
     bg_width = bg.shape[1]
     bg_height = bg.shape[0]
 
@@ -297,22 +307,26 @@ def over_transparent(bg, over, x, y):
         over = over[:h]
 
     if over.shape[2] < 4:
-        over = np.concatenate([over,
-                               np.ones((over.shape[0],
-                                        over.shape[1],
-                                        1),
-                               dtype=over.dtype) * 255],
-                               axis = 2,)
+        over = np.concatenate(
+            [
+                over,
+                np.ones((over.shape[0], over.shape[1], 1), dtype=over.dtype)
+                * 255,
+            ],
+            axis=2,
+        )
 
     over_image = over[..., :3]
     mask = over[..., 3:] / 255.0
-    bg[y:y+h, x:x+w] = (1.0 - mask) * bg[y:y+h, x:x+w] + mask * over_image
+    bg[y : y + h, x : x + w] = (1.0 - mask) * bg[
+        y : y + h, x : x + w
+    ] + mask * over_image
 
     return bg
 
 
 if __name__ == "__main__":
-    video = 'video/Astrophotography-Stars-Sunsets-Sunrises-Storms.ogg'
+    video = "video/Astrophotography-Stars-Sunsets-Sunrises-Storms.ogg"
     # Taille des images multiple de 32, 32*20=640
     # 2000 images par classe 2000x27=54000 + 6000 de test
     cs = CreateShot(640, video, number=60000)

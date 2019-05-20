@@ -1,4 +1,4 @@
-# semaphore_cv_yolo
+# Semaphore CV Yolo
 
 Création d'image pour tester une Intelligence Artificielle avec Yolo Darknet
 
